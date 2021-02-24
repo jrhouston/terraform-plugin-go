@@ -51,6 +51,18 @@ func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) (*tfplu
 		}
 		resp.DataSourceSchemas[k] = schema
 	}
+	resp.StorageSchemas = make(map[string]*tfplugin5.Schema, len(in.StorageSchemas))
+	for k, v := range in.StorageSchemas {
+		if v == nil {
+			resp.StorageSchemas[k] = nil
+			continue
+		}
+		schema, err := Schema(v)
+		if err != nil {
+			return &resp, fmt.Errorf("error marshaling storage schema for %q: %w", k, err)
+		}
+		resp.StorageSchemas[k] = schema
+	}
 	diags, err := Diagnostics(in.Diagnostics)
 	if err != nil {
 		return &resp, err

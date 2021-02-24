@@ -190,6 +190,151 @@ func (s *server) Configure(ctx context.Context, req *tfplugin5.Configure_Request
 	return ret, nil
 }
 
+func (s *server) ValidateStorageConfig(ctx context.Context, req *tfplugin5.ValidateStorageConfig_Request) (*tfplugin5.ValidateStorageConfig_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.ValidateStorageConfigRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.ValidateStorageConfig(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.ValidateStorageConfig_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (s *server) ConfigureStorage(ctx context.Context, req *tfplugin5.ConfigureStorage_Request) (*tfplugin5.ConfigureStorage_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.ConfigureStorageRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.ConfigureStorage(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.ConfigureStorage_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (s *server) ReadState(req *tfplugin5.ReadState_Request, srv tfplugin5.Provider_ReadStateServer) error {
+	r, err := fromproto.ReadStateRequest(req)
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.downstream.ReadState(srv.Context(), r)
+	if err != nil {
+		return err
+	}
+
+	ret, err := toproto.ReadState_Response(resp)
+	if err != nil {
+		return err
+	}
+
+	// TODO chunk the state and send it in batches
+	return srv.Send(ret)
+}
+
+func (s *server) WriteState(srv tfplugin5.Provider_WriteStateServer) error {
+	// TODO call Recv() until we get io.EOF and reassmble the full state
+	req, err := srv.Recv()
+	if err != nil {
+		return err
+	}
+
+	r, err := fromproto.WriteStateRequest(req)
+	if err != nil {
+		return err
+	}
+	resp, err := s.downstream.WriteState(srv.Context(), r)
+	if err != nil {
+		return err
+	}
+	ret, err := toproto.WriteState_Response(resp)
+	if err != nil {
+		return err
+	}
+
+	return srv.SendAndClose(ret)
+}
+
+func (s *server) LockState(ctx context.Context, req *tfplugin5.LockState_Request) (*tfplugin5.LockState_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.LockStateRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.LockState(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.LockState_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (s *server) UnlockState(ctx context.Context, req *tfplugin5.UnlockState_Request) (*tfplugin5.UnlockState_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.UnlockStateRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.UnlockState(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.UnlockState_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (s *server) GetStates(ctx context.Context, req *tfplugin5.GetStates_Request) (*tfplugin5.GetStates_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.GetStatesRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.GetStates(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.GetStates_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (s *server) DeleteState(ctx context.Context, req *tfplugin5.DeleteState_Request) (*tfplugin5.DeleteState_Response, error) {
+	ctx = s.stoppableContext(ctx)
+	r, err := fromproto.DeleteStateRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := s.downstream.DeleteState(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	ret, err := toproto.DeleteState_Response(resp)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
 // stop closes the stopCh associated with the server and replaces it with a new
 // one.
 //

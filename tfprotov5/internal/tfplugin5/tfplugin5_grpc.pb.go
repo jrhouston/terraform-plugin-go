@@ -25,6 +25,15 @@ type ProviderClient interface {
 	UpgradeResourceState(ctx context.Context, in *UpgradeResourceState_Request, opts ...grpc.CallOption) (*UpgradeResourceState_Response, error)
 	//////// One-time initialization, called before other functions below
 	Configure(ctx context.Context, in *Configure_Request, opts ...grpc.CallOption) (*Configure_Response, error)
+	//////// State Storage Lifecycle
+	ValidateStorageConfig(ctx context.Context, in *ValidateStorageConfig_Request, opts ...grpc.CallOption) (*ValidateStorageConfig_Response, error)
+	ConfigureStorage(ctx context.Context, in *ConfigureStorage_Request, opts ...grpc.CallOption) (*ConfigureStorage_Response, error)
+	ReadState(ctx context.Context, in *ReadState_Request, opts ...grpc.CallOption) (Provider_ReadStateClient, error)
+	WriteState(ctx context.Context, opts ...grpc.CallOption) (Provider_WriteStateClient, error)
+	LockState(ctx context.Context, in *LockState_Request, opts ...grpc.CallOption) (*LockState_Response, error)
+	UnlockState(ctx context.Context, in *UnlockState_Request, opts ...grpc.CallOption) (*UnlockState_Response, error)
+	GetStates(ctx context.Context, in *GetStates_Request, opts ...grpc.CallOption) (*GetStates_Response, error)
+	DeleteState(ctx context.Context, in *DeleteState_Request, opts ...grpc.CallOption) (*DeleteState_Response, error)
 	//////// Managed Resource Lifecycle
 	ReadResource(ctx context.Context, in *ReadResource_Request, opts ...grpc.CallOption) (*ReadResource_Response, error)
 	PlanResourceChange(ctx context.Context, in *PlanResourceChange_Request, opts ...grpc.CallOption) (*PlanResourceChange_Response, error)
@@ -97,6 +106,126 @@ func (c *providerClient) Configure(ctx context.Context, in *Configure_Request, o
 	return out, nil
 }
 
+func (c *providerClient) ValidateStorageConfig(ctx context.Context, in *ValidateStorageConfig_Request, opts ...grpc.CallOption) (*ValidateStorageConfig_Response, error) {
+	out := new(ValidateStorageConfig_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/ValidateStorageConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) ConfigureStorage(ctx context.Context, in *ConfigureStorage_Request, opts ...grpc.CallOption) (*ConfigureStorage_Response, error) {
+	out := new(ConfigureStorage_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/ConfigureStorage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) ReadState(ctx context.Context, in *ReadState_Request, opts ...grpc.CallOption) (Provider_ReadStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Provider_serviceDesc.Streams[0], "/tfplugin5.Provider/ReadState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &providerReadStateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Provider_ReadStateClient interface {
+	Recv() (*ReadState_Response, error)
+	grpc.ClientStream
+}
+
+type providerReadStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *providerReadStateClient) Recv() (*ReadState_Response, error) {
+	m := new(ReadState_Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *providerClient) WriteState(ctx context.Context, opts ...grpc.CallOption) (Provider_WriteStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Provider_serviceDesc.Streams[1], "/tfplugin5.Provider/WriteState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &providerWriteStateClient{stream}
+	return x, nil
+}
+
+type Provider_WriteStateClient interface {
+	Send(*WriteState_Request) error
+	CloseAndRecv() (*WriteState_Response, error)
+	grpc.ClientStream
+}
+
+type providerWriteStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *providerWriteStateClient) Send(m *WriteState_Request) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *providerWriteStateClient) CloseAndRecv() (*WriteState_Response, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(WriteState_Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *providerClient) LockState(ctx context.Context, in *LockState_Request, opts ...grpc.CallOption) (*LockState_Response, error) {
+	out := new(LockState_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/LockState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) UnlockState(ctx context.Context, in *UnlockState_Request, opts ...grpc.CallOption) (*UnlockState_Response, error) {
+	out := new(UnlockState_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/UnlockState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) GetStates(ctx context.Context, in *GetStates_Request, opts ...grpc.CallOption) (*GetStates_Response, error) {
+	out := new(GetStates_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/GetStates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) DeleteState(ctx context.Context, in *DeleteState_Request, opts ...grpc.CallOption) (*DeleteState_Response, error) {
+	out := new(DeleteState_Response)
+	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/DeleteState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *providerClient) ReadResource(ctx context.Context, in *ReadResource_Request, opts ...grpc.CallOption) (*ReadResource_Response, error) {
 	out := new(ReadResource_Response)
 	err := c.cc.Invoke(ctx, "/tfplugin5.Provider/ReadResource", in, out, opts...)
@@ -163,6 +292,15 @@ type ProviderServer interface {
 	UpgradeResourceState(context.Context, *UpgradeResourceState_Request) (*UpgradeResourceState_Response, error)
 	//////// One-time initialization, called before other functions below
 	Configure(context.Context, *Configure_Request) (*Configure_Response, error)
+	//////// State Storage Lifecycle
+	ValidateStorageConfig(context.Context, *ValidateStorageConfig_Request) (*ValidateStorageConfig_Response, error)
+	ConfigureStorage(context.Context, *ConfigureStorage_Request) (*ConfigureStorage_Response, error)
+	ReadState(*ReadState_Request, Provider_ReadStateServer) error
+	WriteState(Provider_WriteStateServer) error
+	LockState(context.Context, *LockState_Request) (*LockState_Response, error)
+	UnlockState(context.Context, *UnlockState_Request) (*UnlockState_Response, error)
+	GetStates(context.Context, *GetStates_Request) (*GetStates_Response, error)
+	DeleteState(context.Context, *DeleteState_Request) (*DeleteState_Response, error)
 	//////// Managed Resource Lifecycle
 	ReadResource(context.Context, *ReadResource_Request) (*ReadResource_Response, error)
 	PlanResourceChange(context.Context, *PlanResourceChange_Request) (*PlanResourceChange_Response, error)
@@ -196,6 +334,30 @@ func (UnimplementedProviderServer) UpgradeResourceState(context.Context, *Upgrad
 func (UnimplementedProviderServer) Configure(context.Context, *Configure_Request) (*Configure_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Configure not implemented")
 }
+func (UnimplementedProviderServer) ValidateStorageConfig(context.Context, *ValidateStorageConfig_Request) (*ValidateStorageConfig_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateStorageConfig not implemented")
+}
+func (UnimplementedProviderServer) ConfigureStorage(context.Context, *ConfigureStorage_Request) (*ConfigureStorage_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfigureStorage not implemented")
+}
+func (UnimplementedProviderServer) ReadState(*ReadState_Request, Provider_ReadStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReadState not implemented")
+}
+func (UnimplementedProviderServer) WriteState(Provider_WriteStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method WriteState not implemented")
+}
+func (UnimplementedProviderServer) LockState(context.Context, *LockState_Request) (*LockState_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LockState not implemented")
+}
+func (UnimplementedProviderServer) UnlockState(context.Context, *UnlockState_Request) (*UnlockState_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnlockState not implemented")
+}
+func (UnimplementedProviderServer) GetStates(context.Context, *GetStates_Request) (*GetStates_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStates not implemented")
+}
+func (UnimplementedProviderServer) DeleteState(context.Context, *DeleteState_Request) (*DeleteState_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteState not implemented")
+}
 func (UnimplementedProviderServer) ReadResource(context.Context, *ReadResource_Request) (*ReadResource_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadResource not implemented")
 }
@@ -223,7 +385,7 @@ type UnsafeProviderServer interface {
 	mustEmbedUnimplementedProviderServer()
 }
 
-func RegisterProviderServer(s *grpc.Server, srv ProviderServer) {
+func RegisterProviderServer(s grpc.ServiceRegistrar, srv ProviderServer) {
 	s.RegisterService(&_Provider_serviceDesc, srv)
 }
 
@@ -331,6 +493,161 @@ func _Provider_Configure_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProviderServer).Configure(ctx, req.(*Configure_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_ValidateStorageConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateStorageConfig_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ValidateStorageConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/ValidateStorageConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ValidateStorageConfig(ctx, req.(*ValidateStorageConfig_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_ConfigureStorage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureStorage_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ConfigureStorage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/ConfigureStorage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ConfigureStorage(ctx, req.(*ConfigureStorage_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_ReadState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ReadState_Request)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ProviderServer).ReadState(m, &providerReadStateServer{stream})
+}
+
+type Provider_ReadStateServer interface {
+	Send(*ReadState_Response) error
+	grpc.ServerStream
+}
+
+type providerReadStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *providerReadStateServer) Send(m *ReadState_Response) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Provider_WriteState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ProviderServer).WriteState(&providerWriteStateServer{stream})
+}
+
+type Provider_WriteStateServer interface {
+	SendAndClose(*WriteState_Response) error
+	Recv() (*WriteState_Request, error)
+	grpc.ServerStream
+}
+
+type providerWriteStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *providerWriteStateServer) SendAndClose(m *WriteState_Response) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *providerWriteStateServer) Recv() (*WriteState_Request, error) {
+	m := new(WriteState_Request)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _Provider_LockState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LockState_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).LockState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/LockState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).LockState(ctx, req.(*LockState_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_UnlockState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnlockState_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).UnlockState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/UnlockState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).UnlockState(ctx, req.(*UnlockState_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_GetStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStates_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).GetStates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/GetStates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).GetStates(ctx, req.(*GetStates_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_DeleteState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteState_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).DeleteState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tfplugin5.Provider/DeleteState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).DeleteState(ctx, req.(*DeleteState_Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -472,6 +789,30 @@ var _Provider_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Provider_Configure_Handler,
 		},
 		{
+			MethodName: "ValidateStorageConfig",
+			Handler:    _Provider_ValidateStorageConfig_Handler,
+		},
+		{
+			MethodName: "ConfigureStorage",
+			Handler:    _Provider_ConfigureStorage_Handler,
+		},
+		{
+			MethodName: "LockState",
+			Handler:    _Provider_LockState_Handler,
+		},
+		{
+			MethodName: "UnlockState",
+			Handler:    _Provider_UnlockState_Handler,
+		},
+		{
+			MethodName: "GetStates",
+			Handler:    _Provider_GetStates_Handler,
+		},
+		{
+			MethodName: "DeleteState",
+			Handler:    _Provider_DeleteState_Handler,
+		},
+		{
 			MethodName: "ReadResource",
 			Handler:    _Provider_ReadResource_Handler,
 		},
@@ -496,7 +837,18 @@ var _Provider_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Provider_Stop_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ReadState",
+			Handler:       _Provider_ReadState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "WriteState",
+			Handler:       _Provider_WriteState_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "tfplugin5.proto",
 }
 
@@ -613,7 +965,7 @@ type UnsafeProvisionerServer interface {
 	mustEmbedUnimplementedProvisionerServer()
 }
 
-func RegisterProvisionerServer(s *grpc.Server, srv ProvisionerServer) {
+func RegisterProvisionerServer(s grpc.ServiceRegistrar, srv ProvisionerServer) {
 	s.RegisterService(&_Provisioner_serviceDesc, srv)
 }
 

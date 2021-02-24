@@ -37,6 +37,13 @@ type ProviderServer interface {
 	// data source is to terraform-plugin-go, so they're their own
 	// interface that is composed into ProviderServer.
 	DataSourceServer
+
+	// StorageServer is an interface encapsulating all the data
+	// source-related RPC requests. ProviderServer implementations must
+	// implement them, but they are a handy interface for defining what a
+	// data source is to terraform-plugin-go, so they're their own
+	// interface that is composed into ProviderServer.
+	StorageServer
 }
 
 // GetProviderSchemaRequest represents a Terraform RPC request for the
@@ -70,6 +77,11 @@ type GetProviderSchemaResponse struct {
 	// shortname and an underscore. It should match the first label after
 	// `data` in a user's configuration.
 	DataSourceSchemas map[string]*Schema
+
+	// StorageSchemas is a map of storage names to the schema for
+	// the configuration specified the storage block. The name should be a
+	// storage name.
+	StorageSchemas map[string]*Schema
 
 	// Diagnostics report errors or warnings related to returning the
 	// provider's schemas. Returning an empty slice indicates success, with
